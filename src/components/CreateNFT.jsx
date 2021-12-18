@@ -48,15 +48,17 @@ const CreateNFT = () => {
   }
 
   // Moralis
-  const { Moralis } = useMoralis();
+  const { authenticate, isAuthenticated, Moralis } = useMoralis();
   // Upload file [i.e. Image] to IPFS
   const handleUploadImage = async (event) => {
     const data = event.target.files[0];
     try {
-      const file = new Moralis.File(data.name, data);
-      await file.saveIPFS({ useMasterKey: true }).then((response) => {
-        setImageUrl(response.ipfs());
-      });
+      if (isAuthenticated) {
+        const file = new Moralis.File(data.name, data);
+        await file.saveIPFS({ useMasterKey: true }).then((response) => {
+          setImageUrl(response.ipfs());
+        });
+      } else authenticate();
     } catch (error) {
       console.log("Error Uplading Image to IPFS:", error);
     }
@@ -83,7 +85,6 @@ const CreateNFT = () => {
       // Upload Token URI
       await file.saveIPFS({ useMasterKey: true }).then((responce) => {
         mintItem(responce.ipfs());
-        setCreating(false);
       });
     } catch (error) {
       console.log("Error in Uplading Token MetaData to IPFS:", error);
@@ -113,6 +114,7 @@ const CreateNFT = () => {
     else if (selected.id === 2) transaction = await contract2.createToken(url);
     let tx = await transaction.wait(); // wait for transaction to complete...
     setTxDetails(tx);
+    setCreating(false);
     setOpen(true);
     console.log("Output:", tx);
   };
@@ -163,7 +165,7 @@ const CreateNFT = () => {
                       <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                         <Dialog.Title
                           as="h3"
-                          className="text-xl font-bold leading-6 font-medium text-gray-900"
+                          className="text-xl font-bold leading-6 text-gray-900"
                         >
                           {txDetails?.confirmations === 1
                             ? "Transaction Successful!"
@@ -171,7 +173,7 @@ const CreateNFT = () => {
                         </Dialog.Title>
                         <div className="mt-2">
                           <p className="text-sm font-bold text-white">
-                            {txDetails?.confirmations === 1 ? (
+                            {txDetails?.status === 1 ? (
                               <div>
                                 <p>FROM:</p>
                                 {txDetails?.from}
@@ -190,7 +192,7 @@ const CreateNFT = () => {
                                       }}
                                     >
                                       <MdContentCopy />
-                                    </span>          
+                                    </span>
                                   </span>
                                 </p>
                               </div>
@@ -408,10 +410,14 @@ const CreateNFT = () => {
                 className="inline-flex justify-center py-2 px-4 border border-transparent shadow-lg text-sm font-medium rounded-md text-primary bg-secondary border-primary hover:bg-primary hover:text-secondary"
                 onClick={(event) => createItem(event)}
               >
-                {creating && (
-                  <BiLoaderAlt className="animate-spin h-5 w-5 mr-3 text-primary hover:text-secondary" />
+                {creating ? (
+                  <span>
+                    <BiLoaderAlt className="animate-spin h-5 w-5 mr-3 text-primary hover:text-secondary focus:text-secondary" />
+                    Creating...
+                  </span>
+                ) : (
+                  Create
                 )}
-                Create
               </button>
             </div>
           </div>

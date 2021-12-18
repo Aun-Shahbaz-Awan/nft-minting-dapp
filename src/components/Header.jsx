@@ -1,7 +1,9 @@
 import { GiFrozenBlock } from "react-icons/gi";
 import { IoMdAddCircle } from "react-icons/io";
+import { useMoralis } from "react-moralis";
 
 const Header = () => {
+  const { authenticate, isAuthenticated } = useMoralis();
   return (
     <div className="m-3 rounded-lg">
       <div className="max-w-7xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
@@ -39,7 +41,7 @@ const Header = () => {
             </div>
             {/* Connect */}
             <div className="order-1 mt-2 mx-4 flex-shrink-0 sm:order-4 sm:mt-0  text-white border border-gray-400 rounded-lg hover:text-primar hover:border-primary hover:text-primary">
-              <span className="flex items-center justify-center px-4 py-2 text-sm font-medium ">
+              <span className="flex items-center justify-center px-4 py-2 text-sm font-medium " onClick={ !isAuthenticated ? () => authenticate() : ''}>
                 Connect
               </span>
             </div>
