@@ -54,7 +54,7 @@ const CreateNFT = () => {
     const data = event.target.files[0];
     try {
       const file = new Moralis.File(data.name, data);
-      await file.saveIPFS().then((response) => {
+      await file.saveIPFS({ useMasterKey: true }).then((response) => {
         setImageUrl(response.ipfs());
       });
     } catch (error) {
@@ -81,7 +81,7 @@ const CreateNFT = () => {
         base64: btoa(JSON.stringify(metadata)),
       });
       // Upload Token URI
-      await file.saveIPFS().then((responce) => {
+      await file.saveIPFS({ useMasterKey: true }).then((responce) => {
         mintItem(responce.ipfs());
         setCreating(false);
       });
