@@ -3,12 +3,6 @@ import { GiFrozenBlock } from "react-icons/gi";
 import { IoMdAddCircle } from "react-icons/io";
 
 const Header = () => {
-  const [search, setSearch] = useState("");
-  // Handle Search Event
-  const handleSearch = async (event) => {
-    console.log("Searched:", search);
-    event.preventDefault();
-  };
   return (
     <div className="m-3 rounded-lg">
       <div className="max-w-7xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
