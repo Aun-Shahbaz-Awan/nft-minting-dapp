@@ -7,9 +7,7 @@ function App() {
   return (
     <React.Fragment>
       <Header />
-
         <CreateNFT />
-
       <Footer />
     </React.Fragment>
   );

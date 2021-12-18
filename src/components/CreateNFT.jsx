@@ -42,14 +42,13 @@ const CreateNFT = () => {
   //Popup
   const [open, setOpen] = useState(false);
   const cancelButtonRef = useRef(null);
-
+  // Moralis
+  const { authenticate, isAuthenticated, Moralis } = useMoralis();
   function classNames(...classes) {
     return classes.filter(Boolean).join(" ");
   }
 
-  // Moralis
-  const { authenticate, isAuthenticated, Moralis } = useMoralis();
-  // Upload file [i.e. Image] to IPFS
+  // 1.Upload file [i.e. Image] to IPFS
   const handleUploadImage = async (event) => {
     const data = event.target.files[0];
     try {
@@ -63,34 +62,7 @@ const CreateNFT = () => {
       console.log("Error Uplading Image to IPFS:", error);
     }
   };
-  // Creating Item and Saving it to IPFS
-  const createItem = async (e) => {
-    const { name, description } = formInput;
-    // Return if there is no name, description or file URL
-    if (!name || !description || !imageUrl) return;
-    setCreating(true);
-    const metadata = {
-      name: name,
-      description: description,
-      image: imageUrl,
-    };
-    setFormInput({ ...formInput, name: "", description: "" });
-    e.preventDefault();
-    setImageUrl("");
-    // Save Token Metadata to IPFS
-    try {
-      const file = new Moralis.File("file.json", {
-        base64: btoa(JSON.stringify(metadata)),
-      });
-      // Upload Token URI
-      await file.saveIPFS({ useMasterKey: true }).then((responce) => {
-        mintItem(responce.ipfs());
-      });
-    } catch (error) {
-      console.log("Error in Uplading Token MetaData to IPFS:", error);
-    }
-  };
-  //  1.Mint item
+  //  2.Mint item
   const mintItem = async (url) => {
     console.log("Minting... ");
     const web3Modal = new Web3Modal({});
@@ -115,8 +87,43 @@ const CreateNFT = () => {
     let tx = await transaction.wait(); // wait for transaction to complete...
     setTxDetails(tx);
     setCreating(false);
-    setOpen(true);
+    // setOpen(true);
     console.log("Output:", tx);
+  };
+  // Creating Item and Saving it to IPFS
+  const createItem = async (e) => {
+    const { name, description } = formInput;
+    // // Return if there is no name, description or file URL
+    if (!name || !description || !imageUrl) {
+      console.log("Upload Name, Description, and Image");
+      return;
+    }
+    setCreating(true);
+    const metadata = {
+      name: name,
+      description: description,
+      image: imageUrl,
+    };
+    setFormInput({ ...formInput, name: "", description: "" });
+    e.preventDefault();
+    setImageUrl("");
+    // Save Token Metadata to IPFS
+    try {
+      const file = new Moralis.File("file.json", {
+        base64: btoa(JSON.stringify(metadata)),
+      });
+      // Upload Token URI
+      if (isAuthenticated) {
+        await file.saveIPFS({ useMasterKey: true }).then((responce) => {
+          mintItem(responce.ipfs());
+        });
+      } else {
+        console.log("User not Authenticated");
+        return;
+      }
+    } catch (error) {
+      console.log("Error in Uplading Token MetaData to IPFS:", error);
+    }
   };
 
   return (
@@ -261,6 +268,7 @@ const CreateNFT = () => {
                       name="file-upload"
                       type="file"
                       className="sr-only"
+                      required
                       onChange={handleUploadImage}
                     />
                   </label>
@@ -416,7 +424,7 @@ const CreateNFT = () => {
                     Creating...
                   </span>
                 ) : (
-                  Create
+                  <span>Create</span>
                 )}
               </button>
             </div>
