@@ -10,7 +10,11 @@ const Footer = () => {
             </a>
           </span>
           <span className="hidden md:inline">
-            Product of Kaizen Global - Design by: Aun Shahbaz Awan.
+            Product of{" "}
+            <a href="https://www.thekaizenglobal.com/" className="text-primary">
+              Kaizen Global&nbsp;
+            </a>
+            - Design by: Aun Shahbaz Awan.
           </span>
         </p>
       </div>
