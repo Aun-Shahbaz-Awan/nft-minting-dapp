@@ -1,5 +1,6 @@
 import React, { useState, Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+// import {AiOutlineWarning} from "react-icons/ai"
 
 const MessagePopup = ({ isOpen, heading, message, handlePopup }) => {
   const [open, setOpen] = useState(isOpen);
@@ -54,7 +55,7 @@ const MessagePopup = ({ isOpen, heading, message, handlePopup }) => {
                     </Dialog.Title>
                     <div className="mt-2">
                       {/* Message */}
-                      <p className="text-sm font-bold text-white">{message}</p>
+                      <p className="text-sm font-bold text-gray-600">{message}</p>
                     </div>
                   </div>
                 </div>

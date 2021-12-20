@@ -1,7 +1,12 @@
 import React, { useState, Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { MdContentCopy } from "react-icons/md";
+import { GiBleedingEye } from "react-icons/gi";
 
-function TransactionPopup() {
+function TransactionPopup({ isOpen, message, handlePopup }) {
+  const [open, setOpen] = useState(isOpen);
+  const cancelButtonRef = useRef(null);
+  const txDetails = JSON.parse(message);
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog
@@ -45,19 +50,20 @@ function TransactionPopup() {
                       as="h3"
                       className="text-xl font-bold leading-6 text-gray-900"
                     >
-                      {txDetails?.confirmations === 1
-                        ? "Transaction Successful!"
+                      {txDetails?.status === 1
+                        ? "Token Minted Successful!"
                         : "Transaction Unsuccessful"}
                     </Dialog.Title>
                     <div className="mt-2">
                       <p className="text-sm font-bold text-white">
                         {txDetails?.status === 1 ? (
                           <div>
-                            <p>FROM:</p>
-                            {txDetails?.from}
-                            <p>FROM:</p>
-                            <p>TO:</p>
+                            <p>Contract Address:</p>
                             {txDetails?.to}
+                            <p>
+                              Token ID:{" "}
+                              {parseInt(txDetails.events[0].args[2]._hex, 16)}
+                            </p>
                             <p>
                               Transaction Hash:
                               <span className="flex">
@@ -73,6 +79,7 @@ function TransactionPopup() {
                                 </span>
                               </span>
                             </p>
+                            <hr />
                           </div>
                         ) : (
                           "Transaction unSuccessful"
@@ -86,9 +93,23 @@ function TransactionPopup() {
                 <button
                   type="button"
                   className="w-full inline-flex justify-center rounded-md border border-primary px-6 py-2 bg-transparent text-base font-medium text-primary hover:bg-primary hover:text-secondary sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => setOpen(false)}
+                  //   onClick={() => setOpen(false)}
+                  onClick={() => handlePopup(false)}
                 >
                   Ok
+                </button>
+                <button
+                  type="button"
+                  className="w-full inline-flex justify-center rounded-md border border-primary px-6 py-2 bg-transparent text-base font-medium text-primary hover:bg-primary hover:text-secondary sm:ml-3 sm:w-auto sm:text-sm"
+                >
+                  <a
+                    className="flex items-center"
+                    href={`https://testnets.opensea.io/assets/${
+                      txDetails?.to
+                    }/${parseInt(txDetails.events[0].args[2]._hex, 16)}`}
+                  >
+                    View <GiBleedingEye className="ml-2" />
+                  </a>
                 </button>
               </div>
             </div>

@@ -3,7 +3,6 @@ import { Listbox, Transition } from "@headlessui/react";
 //_____________________________
 import { HiSelector } from "react-icons/hi";
 import { GoCheck } from "react-icons/go";
-
 import { BiEdit, BiImageAdd, BiLoaderAlt } from "react-icons/bi";
 //_____________________________
 import { ethers } from "ethers";
@@ -14,8 +13,8 @@ import { NFTMinterOneAddress, NFTMinterTwoAddress } from "../config";
 import NFTMinterOne from "../artifacts/contracts/NFTMinterOne.sol/NFTMinterOne.json";
 import NFTMinterTwo from "../artifacts/contracts/NFTMinterTwo.sol/NFTMinterTwo.json";
 import MessagePopup from "./subComponents/MessagePopup";
+import TransactionPopup from "./subComponents/TransactionPopup";
 //_____________________________
-
 const collection = [
   {
     id: 1,
@@ -35,53 +34,99 @@ const CreateNFT = () => {
   function classNames(...classes) {
     return classes.filter(Boolean).join(" ");
   }
+  // Moralis
+  const { authenticate, isAuthenticated, Moralis } = useMoralis();
+  // Form
+  const [selected, setSelected] = useState(collection[0]);
+  const [creating, setCreating] = useState(false);
   const [formInput, setFormInput] = useState({
     name: "",
     description: "",
+    imageUrl: "",
   });
-  const [imageUrl, setImageUrl] = useState("");
-  const [selected, setSelected] = useState(collection[0]);
-  const [creating, setCreating] = useState(false);
-  // Moralis
-  const { authenticate, isAuthenticated, Moralis } = useMoralis();
-  // Popup Open/Close
-  const [popup, setPopup] = useState(false);
-  const [heading, setHeading] = useState("");
-  const [message, setMessage] = useState("");
+  // Message Popup
+  const [popup, setPopup] = useState({
+    isOpen: false,
+    heading: "",
+    message: "",
+  });
   const handlePopupState = (popupState) => {
-    setPopup(popupState);
+    setPopup(popupState, "", "");
   };
   const triggerPopup = (heading, message) => {
-    setHeading(heading);
-    setMessage(message);
-    setPopup(true);
+    setPopup({ isOpen: true, heading, message });
   };
-
+  // Message Popup --END
+  // Transaction Popup
+  const [transPopup, setTransPopup] = useState({
+    isOpen: false,
+    message: "",
+  });
+  const handleTransPopupState = (popupState) => {
+    setTransPopup(popupState, "");
+  };
+  const triggerTransPopup = (message) => {
+    setTransPopup({ isOpen: true, message });
+  };
+  // Transaction Popup --END
   // 1.Upload file [i.e. Image] to IPFS
   const handleUploadImage = async (event) => {
     console.log("Handle Image Upload");
     const data = event.target.files[0];
     try {
       if (isAuthenticated) {
-        console.log("Image Uploading...")
+        console.log("Image Uploading...");
         const file = new Moralis.File(data.name, data);
         await file.saveIPFS({ useMasterKey: true }).then((response) => {
-          setImageUrl(response.ipfs());
+          setFormInput({ ...formInput, imageUrl: response.ipfs() });
         });
       } else {
-        if(!window.ethereum)
+        if (!window.ethereum)
           triggerPopup(
             "Warring",
             "Non ethereum enabled browser... \n Download Metamask"
           );
         else authenticate();
       }
-        
     } catch (error) {
-      console.log("Error Uplading Image to IPFS:", error);
+      triggerPopup("Error", error.message);
     }
   };
-  //  2.Mint item
+  // 2.Creating Item and Saving it to IPFS
+  const createItem = async (e) => {
+    const { name, description, imageUrl } = formInput;
+    // // Return if there is no name, description or file URL
+    if (!name || !description || !imageUrl) {
+      triggerPopup("Error", "Upload Name, Description, and Image");
+      return;
+    }
+    setCreating(true);
+    const metadata = {
+      name: name,
+      description: description,
+      image: imageUrl,
+    };
+    setFormInput({ name: "", description: "", imageUrl: "" });
+    e.preventDefault();
+    // Save Token Metadata to IPFS
+    try {
+      const file = new Moralis.File("file.json", {
+        base64: btoa(JSON.stringify(metadata)),
+      });
+      // Upload Token URI
+      if (isAuthenticated) {
+        await file.saveIPFS({ useMasterKey: true }).then((responce) => {
+          mintItem(responce.ipfs());
+        });
+      } else {
+        triggerPopup("Error", "User not Authenticated");
+        return;
+      }
+    } catch (error) {
+      triggerPopup("Error in Uplading Token MetaData to IPFS:", error.message);
+    }
+  };
+  // 3.Mint item
   const mintItem = async (url) => {
     console.log("Minting... ");
     const web3Modal = new Web3Modal({});
@@ -104,47 +149,13 @@ const CreateNFT = () => {
     if (selected.id === 1) transaction = await contract1.createToken(url);
     else if (selected.id === 2) transaction = await contract2.createToken(url);
     let tx = await transaction.wait(); // wait for transaction to complete...
-    // Trigger Popup
-    // triggerPopup("Transaction Successfull", tx);
-    triggerPopup("Transaction Successfull","");
+    // Trigger Transaction Popup
+    triggerTransPopup(JSON.stringify(tx));
     // Reset Button Styling
     setCreating(false);
-    console.log("Output:", tx);
-  };
-  //  3.Creating Item and Saving it to IPFS
-  const createItem = async (e) => {
-    const { name, description } = formInput;
-    // // Return if there is no name, description or file URL
-    if (!name || !description || !imageUrl) {
-      console.log("Upload Name, Description, and Image");
-      return;
-    }
-    setCreating(true);
-    const metadata = {
-      name: name,
-      description: description,
-      image: imageUrl,
-    };
-    setFormInput({ ...formInput, name: "", description: "" });
-    e.preventDefault();
-    setImageUrl("");
-    // Save Token Metadata to IPFS
-    try {
-      const file = new Moralis.File("file.json", {
-        base64: btoa(JSON.stringify(metadata)),
-      });
-      // Upload Token URI
-      if (isAuthenticated) {
-        await file.saveIPFS({ useMasterKey: true }).then((responce) => {
-          mintItem(responce.ipfs());
-        });
-      } else {
-        console.log("User not Authenticated");
-        return;
-      }
-    } catch (error) {
-      console.log("Error in Uplading Token MetaData to IPFS:", error);
-    }
+    // console.log("Output:", tx);
+    // console.log("Args:", tx.events[0].args[2]._hex);
+    // console.log("Args to S:", parseInt(tx.events[0].args[2]._hex, 16));
   };
 
   useEffect(() => {
@@ -156,112 +167,22 @@ const CreateNFT = () => {
   return (
     <div className="p-4 my-10 flex justify-center w-full">
       <div className="xl:w-3/5 lg:w-1/2 md:w-10/12 sm:w-11/12 justify-center">
-        {popup && (
+        {popup.isOpen && (
           <MessagePopup
-            isOpen={popup}
-            heading={heading}
-            message={message}
+            isOpen={popup.isOpen}
+            heading={popup.heading}
+            message={popup.message}
             handlePopup={handlePopupState}
           />
         )}
+        {transPopup.isOpen && (
+          <TransactionPopup
+            isOpen={transPopup.isOpen}
+            message={transPopup.message}
+            handlePopup={handleTransPopupState}
+          />
+        )}
 
-        {/* Popup */}
-
-        {/* <Transition.Root show={open} as={Fragment}>
-            <Dialog
-              as="div"
-              className="fixed z-10 inset-0 overflow-y-auto"
-              initialFocus={cancelButtonRef}
-              onClose={setOpen}
-            >
-              <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <Transition.Child
-                  as={Fragment}
-                  enter="ease-out duration-300"
-                  enterFrom="opacity-0"
-                  enterTo="opacity-100"
-                  leave="ease-in duration-200"
-                  leaveFrom="opacity-100"
-                  leaveTo="opacity-0"
-                >
-                  <Dialog.Overlay className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-                </Transition.Child>
-                <span
-                  className="hidden sm:inline-block sm:align-middle sm:h-screen"
-                  aria-hidden="true"
-                >
-                  &#8203;
-                </span>
-                <Transition.Child
-                  as={Fragment}
-                  enter="ease-out duration-300"
-                  enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                  enterTo="opacity-100 translate-y-0 sm:scale-100"
-                  leave="ease-in duration-200"
-                  leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                  leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                >
-                  <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-                    <div className=" bg-green-300 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                      <div className="sm:flex sm:items-start">
-                        <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                          <Dialog.Title
-                            as="h3"
-                            className="text-xl font-bold leading-6 text-gray-900"
-                          >
-                            {txDetails?.confirmations === 1
-                              ? "Transaction Successful!"
-                              : "Transaction Unsuccessful"}
-                          </Dialog.Title>
-                          <div className="mt-2">
-                            <p className="text-sm font-bold text-white">
-                              {txDetails?.status === 1 ? (
-                                <div>
-                                  <p>FROM:</p>
-                                  {txDetails?.from}
-                                  <p>FROM:</p>
-                                  <p>TO:</p>
-                                  {txDetails?.to}
-                                  <p>
-                                    Transaction Hash:
-                                    <span className="flex">
-                                      {txDetails?.transactionHash}{" "}
-                                      <span
-                                        onClick={() => {
-                                          navigator.clipboard.writeText(
-                                            txDetails?.transactionHash
-                                          );
-                                        }}
-                                      >
-                                        <MdContentCopy />
-                                      </span>
-                                    </span>
-                                  </p>
-                                </div>
-                              ) : (
-                                "Transaction unSuccessful"
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-secondary px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                      <button
-                        type="button"
-                        className="w-full inline-flex justify-center rounded-md border border-primary px-6 py-2 bg-transparent text-base font-medium text-primary hover:bg-primary hover:text-secondary sm:ml-3 sm:w-auto sm:text-sm"
-                        onClick={() => setOpen(false)}
-                      >
-                        Ok
-                      </button>
-                    </div>
-                  </div>
-                </Transition.Child>
-              </div>
-            </Dialog>
-          </Transition.Root> */}
-
-        {/* Popup End */}
         <h1 className="text-white font-semibold text-4xl mb-5">
           Create your NFT
         </h1>
@@ -277,9 +198,9 @@ const CreateNFT = () => {
                 </p>
               </label>
               <div className="rounded relative h-48">
-                {imageUrl ? (
+                {formInput.imageUrl ? (
                   <img
-                    src={imageUrl}
+                    src={formInput.imageUrl}
                     alt="pic"
                     className="w-full h-full object-cover rounded absolute shadow"
                   />
@@ -451,11 +372,13 @@ const CreateNFT = () => {
             <div className="px-4 py-3 bg-secondary text-right sm:px-6">
               <button
                 disabled={
-                  !imageUrl || !formInput.name || !formInput.description
+                  !formInput.imageUrl ||
+                  !formInput.name ||
+                  !formInput.description
                 }
                 type="submit"
                 className={`inline-flex justify-center py-2 px-4 border border-transparent shadow-lg text-sm font-medium rounded-md  ${
-                  imageUrl && formInput.name && formInput.description
+                  formInput.imageUrl && formInput.name && formInput.description
                     ? "text-primary bg-secondary border-primary hover:bg-primary hover:text-secondary"
                     : " cursor-not-allowed bg-green-100 text-gray-400"
                 }`}
