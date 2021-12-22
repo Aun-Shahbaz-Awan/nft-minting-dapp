@@ -43,19 +43,21 @@ const MessagePopup = ({ isOpen, heading, message, handlePopup }) => {
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-              <div className=" bg-green-300 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div className=" bg-green-300 px-4 pt-6 pb-5 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                     <Dialog.Title
                       as="h3"
-                      className="text-xl font-bold leading-6 text-gray-900"
+                      className="text-2xl font-bold leading-6 text-gray-900"
                     >
                       {/* Heading */}
                       {heading}
                     </Dialog.Title>
                     <div className="mt-2">
                       {/* Message */}
-                      <p className="text-sm font-bold text-gray-600">{message}</p>
+                      <p className="text-md font-bold text-gray-600">
+                        {message}
+                      </p>
                     </div>
                   </div>
                 </div>

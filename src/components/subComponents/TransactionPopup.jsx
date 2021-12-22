@@ -7,6 +7,7 @@ function TransactionPopup({ isOpen, message, handlePopup }) {
   const [open, setOpen] = useState(isOpen);
   const cancelButtonRef = useRef(null);
   const txDetails = JSON.parse(message);
+  console.log(txDetails);
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog
@@ -62,7 +63,7 @@ function TransactionPopup({ isOpen, message, handlePopup }) {
                             {txDetails?.to}
                             <p>
                               Token ID:{" "}
-                              {parseInt(txDetails.events[0].args[2]._hex, 16)}
+                              {parseInt(txDetails.events[0].args[2].hex, 16)}
                             </p>
                             <p>
                               Transaction Hash:
@@ -100,13 +101,13 @@ function TransactionPopup({ isOpen, message, handlePopup }) {
                 </button>
                 <button
                   type="button"
-                  className="w-full inline-flex justify-center rounded-md border border-primary px-6 py-2 bg-transparent text-base font-medium text-primary hover:bg-primary hover:text-secondary sm:ml-3 sm:w-auto sm:text-sm"
+                  className="w-full inline-flex justify-center form rounded-md border border-primary px-6 py-2 bg-transparent text-base font-medium text-primary hover:bg-primary hover:text-secondary sm:ml-3 sm:w-auto sm:text-sm"
                 >
                   <a
                     className="flex items-center"
                     href={`https://testnets.opensea.io/assets/${
                       txDetails?.to
-                    }/${parseInt(txDetails.events[0].args[2]._hex, 16)}`}
+                    }/${parseInt(txDetails.events[0].args[2].hex, 16)}`}
                   >
                     View <GiBleedingEye className="ml-2" />
                   </a>

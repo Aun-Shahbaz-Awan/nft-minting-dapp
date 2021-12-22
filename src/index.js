@@ -1,9 +1,10 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import {MoralisProvider} from "react-moralis"
+import React from "react";
+import ReactDOM from "react-dom";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import { MoralisProvider } from "react-moralis";
+import { BrowserRouter } from "react-router-dom";
 
 ReactDOM.render(
   <React.StrictMode>
@@ -11,7 +12,9 @@ ReactDOM.render(
       appId="Y3Yod9lWu77Xw8y9STtAViGveXbIQphhR6t420Cu"
       serverUrl="https://zete9krq17np.usemoralis.com:2053/server"
     >
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </MoralisProvider>
   </React.StrictMode>,
   document.getElementById("root")

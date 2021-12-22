@@ -120,15 +120,16 @@ const CreateNFT = () => {
         });
       } else {
         triggerPopup("Error", "User not Authenticated");
+        setCreating(false);
         return;
       }
     } catch (error) {
       triggerPopup("Error in Uplading Token MetaData to IPFS:", error.message);
+      setCreating(false);
     }
   };
   // 3.Mint item
   const mintItem = async (url) => {
-    console.log("Minting... ");
     const web3Modal = new Web3Modal({});
     const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
@@ -146,16 +147,18 @@ const CreateNFT = () => {
     );
     let transaction;
     // Creating a new Token[i.e. NFT]
-    if (selected.id === 1) transaction = await contract1.createToken(url);
-    else if (selected.id === 2) transaction = await contract2.createToken(url);
-    let tx = await transaction.wait(); // wait for transaction to complete...
-    // Trigger Transaction Popup
-    triggerTransPopup(JSON.stringify(tx));
-    // Reset Button Styling
-    setCreating(false);
-    // console.log("Output:", tx);
-    // console.log("Args:", tx.events[0].args[2]._hex);
-    // console.log("Args to S:", parseInt(tx.events[0].args[2]._hex, 16));
+    try {
+      if (selected.id === 1) transaction = await contract1.createToken(url);
+      else if (selected.id === 2)
+        transaction = await contract2.createToken(url);
+      let tx = await transaction.wait(); // wait for transaction to complete...
+      // Trigger Transaction Popup
+      triggerTransPopup(JSON.stringify(tx));
+      setCreating(false);
+    } catch (error) {
+      triggerPopup("Error", error.message);
+      setCreating(false);
+    }
   };
 
   useEffect(() => {
