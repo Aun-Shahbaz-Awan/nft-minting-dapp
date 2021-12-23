@@ -2,7 +2,7 @@ import { React, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { GiFrozenBlock } from "react-icons/gi";
 import { HiArrowNarrowRight } from "react-icons/hi";
-const WalletPopup = ({ isOpen, closeModal }) => {
+const WalletPopup = ({ isOpen, closeModal, connectWallet }) => {
   return (
     <>
       <Transition appear show={isOpen} as={Fragment}>
@@ -40,9 +40,11 @@ const WalletPopup = ({ isOpen, closeModal }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-gray-800 shadow-xl rounded-2xl">
+              <div className="inline-block w-full max-w-md p-6 my-12 overflow-hidden text-left align-middle transition-all transform bg-gray-800 shadow-xl rounded-2xl">
                 <div className="flex justify-center">
-                  <GiFrozenBlock className="w-12 h-12 rounded-full bg-secondary text-primary" />
+                  <div className="rounded-full bg-secondary p-4">
+                    <GiFrozenBlock className="w-12 h-12  text-primary" />
+                  </div>
                 </div>
                 <Dialog.Title
                   as="h3"
@@ -50,9 +52,16 @@ const WalletPopup = ({ isOpen, closeModal }) => {
                 >
                   Connect Wallet
                 </Dialog.Title>
+                {/* Wallets */}
                 <div>
                   {/* Metamask */}
-                  <div className="p-4 mb-4 font-bold w-full flex items-center rounded-md border border-gray-500  hover:text-secondary hover:bg-primary hover:border-primary">
+                  <div
+                    onClick={() => {
+                      connectWallet("metamask");
+                      closeModal();
+                    }}
+                    className="p-4 mb-4 font-bold w-full flex items-center rounded-md border border-gray-500  hover:text-secondary hover:bg-primary hover:border-primary"
+                  >
                     <img
                       src={process.env.PUBLIC_URL + "/images/metamask-logo.svg"}
                       alt="metamask"
@@ -61,8 +70,14 @@ const WalletPopup = ({ isOpen, closeModal }) => {
                     Metamask
                     <HiArrowNarrowRight className="ml-auto text-2xl text-primary hover:text-secondary" />
                   </div>
-                  {/* Metamask */}
-                  <div className="p-4 mb-4 font-bold w-full flex items-center rounded-md border border-gray-500  hover:text-secondary hover:bg-primary hover:border-primary">
+                  {/* Wallet Connect */}
+                  <div
+                    onClick={() => {
+                      connectWallet("walletconnect");
+                      closeModal();
+                    }}
+                    className="p-4 mb-4 font-bold w-full flex items-center rounded-md border border-gray-500  hover:text-secondary hover:bg-primary hover:border-primary"
+                  >
                     <img
                       src={
                         process.env.PUBLIC_URL +
@@ -74,20 +89,35 @@ const WalletPopup = ({ isOpen, closeModal }) => {
                     Wallet Connect
                     <HiArrowNarrowRight className="ml-auto text-2xl text-primary hover:text-secondary" />
                   </div>
-                  {/* Metamask */}
-                  <div className="p-4 mb-4 font-bold w-full flex items-center rounded-md border border-gray-500  hover:text-secondary hover:bg-primary hover:border-primary">
+                  {/* Trust Wallet */}
+                  <div
+                    onClick={() => {
+                      connectWallet("fortmatic");
+                      closeModal();
+                    }}
+                    className="p-4 mb-4 font-bold w-full flex items-center rounded-md border border-gray-500  hover:text-secondary hover:bg-primary hover:border-primary"
+                  >
                     <img
-                      src={process.env.PUBLIC_URL + "/images/trustwallet.svg"}
-                      alt="trust wallet"
+                      src={
+                        process.env.PUBLIC_URL +
+                        "/images/fortmatwallet-logo.png"
+                      }
+                      alt="fortmatic"
                       className="mr-4"
                       width={30}
                       height={30}
                     />
-                    Trust Wallet
+                    Fortmatic
                     <HiArrowNarrowRight className="ml-auto text-2xl text-primary hover:text-secondary" />
                   </div>
-                  {/* Metamask */}
-                  <div className="p-4 mb-4 font-bold w-full flex items-center rounded-md border border-gray-500  hover:text-secondary hover:bg-primary hover:border-primary">
+                  {/* D'CENT Wallet */}
+                  <div
+                    onClick={() => {
+                      connectWallet("dcentwallet");
+                      closeModal();
+                    }}
+                    className="p-4 mb-4 font-bold w-full flex items-center rounded-md border border-gray-500  hover:text-secondary hover:bg-primary hover:border-primary"
+                  >
                     <img
                       src={process.env.PUBLIC_URL + "/images/dcent-logo.svg"}
                       alt="dcent wallet"
@@ -98,12 +128,15 @@ const WalletPopup = ({ isOpen, closeModal }) => {
                   </div>
                 </div>
 
-
-                  <p className="mt-4 text-xs text-center ">
-                    By connecting, you agree to our <span className=" text-primary cursor-pointer">Terms</span> and <span className="text-primary cursor-pointer">Protocol
-                    Disclaimer</span>.
-                  </p>
-
+                <p className="mt-4 text-xs text-center ">
+                  By connecting, you agree to our{" "}
+                  <span className=" text-primary cursor-pointer">Terms</span>{" "}
+                  and{" "}
+                  <span className="text-primary cursor-pointer">
+                    Protocol Disclaimer
+                  </span>
+                  .
+                </p>
               </div>
             </Transition.Child>
           </div>

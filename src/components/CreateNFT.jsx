@@ -6,7 +6,7 @@ import { GoCheck } from "react-icons/go";
 import { BiEdit, BiImageAdd, BiLoaderAlt } from "react-icons/bi";
 //_____________________________
 import { ethers } from "ethers";
-import Web3Modal from "web3modal";
+// import Web3Modal from "web3modal";
 import { useMoralis } from "react-moralis";
 //_____________________________
 import { NFTMinterOneAddress, NFTMinterTwoAddress } from "../config";
@@ -30,7 +30,7 @@ const collection = [
   },
 ];
 
-const CreateNFT = () => {
+const CreateNFT = ({signer}) => {
   function classNames(...classes) {
     return classes.filter(Boolean).join(" ");
   }
@@ -111,7 +111,8 @@ const CreateNFT = () => {
     // Save Token Metadata to IPFS
     try {
       const file = new Moralis.File("file.json", {
-        base64: btoa(JSON.stringify(metadata)),
+        _base64: btoa(JSON.stringify(metadata)),
+
       });
       // Upload Token URI
       if (isAuthenticated) {
@@ -130,10 +131,10 @@ const CreateNFT = () => {
   };
   // 3.Mint item
   const mintItem = async (url) => {
-    const web3Modal = new Web3Modal({});
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-    const signer = provider.getSigner();
+    // const web3Modal = new Web3Modal({});
+    // const connection = await web3Modal.connect();
+    // const provider = new ethers.providers.Web3Provider(connection);
+    // const signer = provider.getSigner();
     // NFT Contract
     let contract1 = new ethers.Contract(
       NFTMinterOneAddress,

@@ -14,7 +14,7 @@ const Footer = () => {
             <a href="https://www.thekaizenglobal.com/" className="text-primary">
               Kaizen Global&nbsp;
             </a>
-            - Design by: Aun Shahbaz Awan.
+            - Website under Development.
           </span>
         </p>
       </div>

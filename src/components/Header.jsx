@@ -4,7 +4,7 @@ import { IoMdAddCircle } from "react-icons/io";
 import { Link } from "react-router-dom";
 import WalletPopup from "./subComponents/WalletPopup";
 
-const Header = () => {
+const Header = ({ connectWallet, signer }) => {
   let [isOpen, setIsOpen] = useState(false);
   function closeModal() {
     setIsOpen(false);
@@ -14,7 +14,11 @@ const Header = () => {
   }
   return (
     <React.Fragment>
-      <WalletPopup isOpen={isOpen} closeModal={closeModal}/>
+      <WalletPopup
+        isOpen={isOpen}
+        closeModal={closeModal}
+        connectWallet={connectWallet}
+      />
       <div className="m-3 rounded-lg">
         <div className="max-w-7xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between flex-wrap">
@@ -58,7 +62,8 @@ const Header = () => {
                   className="flex items-center justify-center px-4 py-2 text-sm font-medium cursor-pointer"
                   onClick={openModal}
                 >
-                  Connect Wallet
+                  {console.log("Incoming Signer:", signer)}
+                  {signer ? "Connected" : "Connect Wallet"}
                 </span>
               </div>
             </div>
